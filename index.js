@@ -22,20 +22,28 @@ async function getDashboardData(city) {
     const weatherPromise = fetch(`${weathersURL}${city}`).then(obj => obj.json());
     const airportPromise = fetch(`${airportsURL}${city}`).then(obj => obj.json());
 
-    const [destination, weather, airport] = await Promise.all([
+    const [destination, weather, airport] = await Promise.allSettled([
         destinationPromise,
         weatherPromise,
         airportPromise
     ]);
 
+    const result = {};
 
-    return {
-        "city": destination[0]?.name ? destination[0]?.name : null,
-        "country": destination[0]?.country ? destination[0]?.country : null,
-        "weather": weather[0]?.weather_description ? weather[0]?.weather_description : null,
-        "airport": airport[0]?.name ? airport[0]?.name : null,
-        "temperature": weather[0]?.temperature ? weather[0]?.temperature : null
+    if (destination.status === "rejected") {
+
+        console.error(destination.reason);
+    } else {
+
+        const destinationCity = destination.value[0].name ? destination.value[0].name : null;
+        const destinationCountry = destination.value[0].country ? destination.value[0].country : null;
+
+        result.city = destinationCity;
+        result.country = destinationCountry;
     }
+
+
+    return result
 }
 
 getDashboardData('vienna')
