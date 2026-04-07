@@ -28,11 +28,14 @@ async function getDashboardData(city) {
         airportPromise
     ]);
 
+    console.log(weather.value);
+
+
     const result = {};
 
     if (destination.status === "rejected") {
 
-        console.error(destination.reason);
+        console.error(destination.reason)
     } else {
 
         const destinationCity = destination.value[0].name ? destination.value[0].name : null;
@@ -42,6 +45,21 @@ async function getDashboardData(city) {
         result.country = destinationCountry;
     }
 
+    if (weather.status === "rejected") {
+
+        console.error(weather.reason)
+    } else {
+        result.temperature = weather.value[0]?.temperature ?? null;
+        result.weather = weather.value[0]?.weather_description ?? null;
+    }
+
+    if (airport.status === "rejected") {
+
+        console.error(airport.reason)
+    } else {
+
+        result.airport = airport.value[0]?.name ?? null;
+    }
 
     return result
 }
@@ -50,7 +68,7 @@ getDashboardData('vienna')
     .then(data => {
         console.log('Dasboard data:', data);
         const cityLine = (data.city && data.country) ? `${data.city} is in ${data.country}.\n` : "";
-        const weatherLine = data.temperature ? `Today there are ${data.temperature} degrees and the weather is ${data.weather}.\n` : "";
+        const weatherLine = (data.temperature && data.weather) ? `Today there are ${data.temperature} degrees and the weather is ${data.weather}.\n` : "";
         const airportLine = data.airport ? `The main airport is ${data.airport}.\n` : "";
 
         console.log(cityLine + weatherLine + airportLine);
